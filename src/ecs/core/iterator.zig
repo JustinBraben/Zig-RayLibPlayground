@@ -75,10 +75,44 @@ fn IteratorInterface(
             }
             return null;
         }
+
+        /// strided - set iterator stride (default 1)
+        pub fn strided(
+            self: Self,
+            stride_size: usize,
+        ) Self {
+            return .{
+                .ptr = self.ptr,
+                .end = self.end,
+                .stride = stride_size,
+            };
+        }
+
+        /// window - return a slice and advance by stride
+        pub fn window(
+            self: *Self,
+            window_size: usize,
+        ) ?[]const DataType {
+            switch (comptime Mode) {
+                .forward => {
+                    if (self.ptr + window_size <= self.end) {
+                        defer _ = self.next();
+                        return self.ptr[0..window_size];
+                    }
+                },
+                .reverse => {
+                    if ((self.ptr + 1) - window_size > self.end) {
+                        defer _ = self.next();
+                        return ((self.ptr + 1) - window_size)[0..window_size];
+                    }
+                },
+            }
+            return null;
+        }
     };
 }
 
-test "Iterator" {
+test "iterator basic" {
     {
         var itr = iterator(.forward, "hello");
         try std.testing.expectEqual(itr.next().?, 'h');
@@ -91,5 +125,25 @@ test "Iterator" {
         try std.testing.expectEqual(itr.next().?, 3);
         try std.testing.expectEqual(itr.next().?, 2);
         try std.testing.expectEqual(itr.next().?, 1);
+    }
+    {
+        var arr = [_]i32{1, 2, 3, 4, 5};
+        var itr = iterator(.reverse, &arr);
+        try std.testing.expectEqual(itr.next().?, 5);
+        try std.testing.expectEqual(itr.next().?, 4);
+        try std.testing.expectEqual(itr.next().?, 3);
+        try std.testing.expectEqual(itr.next().?, 2);
+        try std.testing.expectEqual(itr.next().?, 1);
+    }
+}
+
+test "iterator stride" {
+    {
+        var arr = [_]i32{2, 4, 6, 8, 10, 12, 14};
+        var itr = iterator(.reverse, &arr);
+        itr = itr.strided(2);
+        try std.testing.expectEqual(itr.next().?, 14);
+        try std.testing.expectEqual(itr.next().?, 10);
+        try std.testing.expectEqual(itr.next().?, 6);
     }
 }
