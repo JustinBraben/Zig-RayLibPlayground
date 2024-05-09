@@ -1,5 +1,6 @@
 const std = @import("std");
 const ray = @import("raylib.zig");
+const ecs = @import("ecs/ecs.zig");
 
 pub fn main() !void {
     try ray_main();

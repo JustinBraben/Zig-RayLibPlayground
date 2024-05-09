@@ -15,11 +15,32 @@ pub fn build(b: *std.Build) void {
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
 
+    const raylib_optimize = b.option(
+        std.builtin.OptimizeMode,
+        "raylib-optimize",
+        "Prioritize performance, safety, or binary size (-O flag), defaults to value of optimize option",
+    ) orelse optimize;
+
+    const strip = b.option(
+        bool,
+        "strip",
+        "Strip debug info to reduce binary size, defaults to false",
+    ) orelse false;
+
     // define the raylib dependency
     const raylib_dep = b.dependency("raylib", .{
         .target = target,
+        .optimize = raylib_optimize,
+    });
+    
+    // create ecs library
+    const ecs = b.addStaticLibrary(.{
+        .name = "ecs",
+        .root_source_file = .{ .path = "src/ecs/ecs.zig" },
+        .target = target,
         .optimize = optimize,
     });
+    b.installArtifact(ecs);
 
     const exe = b.addExecutable(.{
         .name = "Zig-RayLibPlayground",
@@ -27,6 +48,14 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
+    exe.root_module.strip = strip;
+
+    // expose firefly library as a module
+    const firefly_module = b.addModule("ecs", .{
+        .root_source_file = .{ .path = "src/ecs/ecs.zig" },
+    });
+    firefly_module.addIncludePath(raylib_dep.path("src/"));
+
     exe.linkLibrary(raylib_dep.artifact("raylib"));
 
     // This declares intent for the executable to be installed into the
