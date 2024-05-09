@@ -5,6 +5,12 @@ const Utility = @import("utility.zig");
 
 const Iterator = @This();
 
+pub const IteratorMode = enum { forward, reverse };
+
+pub fn BaseIterator(comptime T: type, mode: IteratorMode) type {
+    return IteratorInterface(T, mode);
+}
+
 pub fn iterator(
     comptime mode: IteratorMode,
     items: anytype,
@@ -15,7 +21,7 @@ pub fn iterator(
         return iterator(mode, @as([]const T, items));
     }
 
-    const P = [*c]const T;
+    const P = [*]const T;
 
     const ptr: P = if (comptime mode == .forward)
         @as(P, @ptrCast(items.ptr)) else (@as(P, @ptrCast(items.ptr)) + items.len) - 1;
@@ -28,12 +34,6 @@ pub fn iterator(
         .end = end,
         .stride = 1,
     };
-}
-
-pub const IteratorMode = enum { forward, reverse };
-
-pub fn BaseIterator(comptime T: type, mode: IteratorMode) type {
-    return IteratorInterface(T, mode);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -79,6 +79,17 @@ fn IteratorInterface(
 }
 
 test "Iterator" {
-    var itr = iterator(.forward, "hello");
-    try std.testing.expectEqual(itr.next().?, 'h');
+    {
+        var itr = iterator(.forward, "hello");
+        try std.testing.expectEqual(itr.next().?, 'h');
+    }
+    {
+        const arr = [_]u8{1, 2, 3, 4, 5};
+        var itr = iterator(.reverse, &arr);
+        try std.testing.expectEqual(itr.next().?, 5);
+        try std.testing.expectEqual(itr.next().?, 4);
+        try std.testing.expectEqual(itr.next().?, 3);
+        try std.testing.expectEqual(itr.next().?, 2);
+        try std.testing.expectEqual(itr.next().?, 1);
+    }
 }
