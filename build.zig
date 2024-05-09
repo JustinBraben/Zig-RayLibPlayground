@@ -32,7 +32,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = raylib_optimize,
     });
-    
+
     // create ecs library
     const ecs = b.addStaticLibrary(.{
         .name = "ecs",
@@ -93,12 +93,21 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-
     const run_unit_tests = b.addRunArtifact(unit_tests);
+
+    // internal tests
+    const internal_test = b.addTest(.{
+        .root_source_file = .{.path = "src/ecs/tests.zig"},
+        .optimize = optimize,
+        .target = target,
+        .name = "internal_tests",
+    });
+    const run_internal_tests = b.addRunArtifact(internal_test);
 
     // Similar to creating the run step earlier, this exposes a `test` step to
     // the `zig build --help` menu, providing a way for the user to request
     // running the unit tests.
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_unit_tests.step);
+    test_step.dependOn(&run_internal_tests.step);
 }

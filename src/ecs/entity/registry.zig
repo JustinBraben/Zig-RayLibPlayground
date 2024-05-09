@@ -1,6 +1,8 @@
 const std = @import("std");
 const Allocator = std.mem.Allocator;
 const assert = std.debug.assert;
+const Iterator = @import("../core/iterator.zig");
+const Utility = @import("../core/utility.zig");
 
 // allow overriding EntityTraits by setting in root via: EntityTraits = EntityTraitsType(.medium);
 const root = @import("root");
