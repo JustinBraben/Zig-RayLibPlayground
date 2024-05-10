@@ -9,22 +9,20 @@ const root = @import("root");
 pub const entity_traits = if (@hasDecl(root, "EntityTraits")) root.EntityTraits.init() else @import("entity.zig").EntityTraits.init();
 pub const Entity = entity_traits.entity_type;
 
+pub const Registry = struct {
+    allocator: Allocator,
 
-const Registry = @This();
+    pub fn init(allocator: Allocator) Registry {
+        return .{
+            .allocator = allocator,
+        };
+    }
 
-allocator: Allocator,
+    // pub fn create(registry: *Registry) Entity {
 
+    // }
 
-pub fn init(allocator: Allocator) Registry {
-    return .{
-        .allocator = allocator,
-    };
-}
-
-// pub fn create(registry: *Registry) Entity {
-
-// }
-
-pub fn deinit(registry: *Registry) void {
-    _ = registry;
-}
+    pub fn deinit(registry: *Registry) void {
+        _ = registry;
+    }
+};
