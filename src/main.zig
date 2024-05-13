@@ -1,9 +1,16 @@
 const std = @import("std");
 const ray = @import("raylib.zig");
 const ecs = @import("ecs/ecs.zig");
+const Game = @import("game/game.zig").Game;
 
 pub fn main() !void {
-    try ray_main();
+    // try ray_main();
+
+    var gpa_impl = std.heap.GeneralPurposeAllocator(.{ .stack_trace_frames = 8 }){};
+    const gpa = gpa_impl.allocator();
+    var game: Game = undefined;
+    game = Game.init(gpa, 850, 450);
+    defer game.deinit();
     try hints();
 }
 
