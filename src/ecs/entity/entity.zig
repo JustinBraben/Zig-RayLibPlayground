@@ -20,14 +20,10 @@ fn EntityTraitsDefinition(comptime EntityType: type, comptime ValueType: type, c
     assert(@typeInfo(ValueType) == .Int and std.meta.Int(.unsigned, @bitSizeOf(ValueType)) == ValueType);
     assert(@typeInfo(VersionType) == .Int and std.meta.Int(.unsigned, @bitSizeOf(VersionType)) == VersionType);
 
-    const sizeOfValueType = @bitSizeOf(ValueType);
-    // const sizeOfVersionType = @bitSizeOf(VersionType);
-    const entityShift = sizeOfValueType;
-
     const entityMaskType = if(EntityType == u64) u64 else u32;
     const versionMaskType = if(VersionType == u32) u32 else u16;
 
-    const entityMask = if (EntityType == u64) std.math.maxInt(u32) else std.math.maxInt(u24);
+    const entityMask: entityMaskType = if (EntityType == u64) std.math.maxInt(u32) else std.math.maxInt(u24);
     const versionMask = if (VersionType == u32) std.math.maxInt(u32) else std.math.maxInt(u12);
 
     // assert entity mask is not 0
@@ -41,6 +37,8 @@ fn EntityTraitsDefinition(comptime EntityType: type, comptime ValueType: type, c
     const versionMaskPowerOfTwo: bool = ((versionMask & (versionMask + 1)) == 0);
     assert(versionMaskPowerOfTwo);
 
+    const length: entityMaskType = Utility.PopCount(entityMask);
+
     return struct {
         entity_type: type = EntityType,
         value_type: type = ValueType,
@@ -49,11 +47,43 @@ fn EntityTraitsDefinition(comptime EntityType: type, comptime ValueType: type, c
         entity_mask: entityMaskType = entityMask,
         /// Mask to use to get the version out of an identifier
         version_mask: versionMaskType = versionMask,
-        /// Bit size of entity in entity_type
-        entity_shift: EntityType = entityShift,
+        /// Length of the version part of the identifier
+        // length: entityMaskType = Utility.PopCount(entityMask),
 
         pub fn init() @This() {
             return @This(){};
+        }
+
+        /// Converts an entity to its underlying type.
+        pub fn to_integral(value: ValueType) EntityType {
+            return @intCast(@as(EntityType, value));
+        }
+
+        /// Returns the entity part once converted to the underlying type.
+        pub fn to_entity(value: ValueType) EntityType {
+            return (to_integral(value) & entityMask);
+        }
+
+        /// Returns the version part once converted to the underlying type.
+        pub fn to_version(value: ValueType) VersionType {
+            if (versionMask == 0) {
+                return VersionType;
+            }
+            return @intCast(@as(VersionType, (to_integral(value) >> length) & versionMask));
+        }
+
+        /// Returns the successor of a given identifier.
+        pub fn next(value: ValueType) ValueType {
+            const vers = to_version(value) + 1;
+            return construct(to_integral(value), @as(VersionType, vers + (vers == versionMask)));
+        }
+
+        /// Constructs an identifier from its parts.
+        pub fn construct(entity: EntityType, version: VersionType) ValueType {
+            if (versionMask == 0) {
+                return ValueType{entity & entityMask};
+            }
+            return ValueType{(entity & entityMask) | (@as(EntityType, version & versionMask) << length)};
         }
     };
 }
@@ -68,7 +98,12 @@ test "entity traits" {
     try std.testing.expectEqual(std.math.maxInt(u32), l.entity_mask);
 
     
-    try std.testing.expectEqual(std.math.maxInt(u8), m.entity_type);
+    try std.testing.expectEqual(u32, m.entity_type);
+    try std.testing.expectEqual(u64, l.entity_type);
+
     try std.testing.expectEqual(u32, m.value_type);
     try std.testing.expectEqual(u64, l.value_type);
+
+    try std.testing.expectEqual(u16, m.version_type);
+    try std.testing.expectEqual(u32, l.version_type);
 }

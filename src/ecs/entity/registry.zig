@@ -3,6 +3,9 @@ const Allocator = std.mem.Allocator;
 const assert = std.debug.assert;
 const Iterator = @import("../core/iterator.zig");
 const Utility = @import("../core/utility.zig");
+const Entity = @import("entity.zig");
+
+const DefaultEnTTTraits = Entity.DefaultEntityTraits;
 
 pub const Registry = struct {
     allocator: Allocator,
@@ -21,3 +24,8 @@ pub const Registry = struct {
         _ = registry;
     }
 };
+
+test "Registry" {
+    var registry = Registry.init(std.testing.allocator);
+    defer registry.deinit();
+}

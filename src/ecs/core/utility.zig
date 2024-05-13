@@ -75,3 +75,36 @@ test "DeepChild" {
     const dc = DeepChild(@TypeOf(a));
     try expect(dc == i32);
 }
+
+/// PopCount returns the number of bits set to 1 in the given value.
+pub fn PopCount(value: anytype) @TypeOf(value) {
+    const UIntType = switch (@TypeOf(value)) {
+        u8, u16, u32, u64 => |T| T,
+        else => |DataType| @compileError("Invalid UIntDataType" ++ DataType ++ " for PopperCount"),
+    };
+
+    const valAnd1 = value & 1;
+    const valShifted = value >> 1;
+
+    return if (value != 0) @as(UIntType, valAnd1) + PopCount(valShifted) else 0;
+}
+
+test "PopCount" {
+    const num_1: u16 = 2;
+    const res_1 = PopCount(num_1);
+    const num_2: u32 = 200;
+    const res_2 = PopCount(num_2);
+    const num_3: u64 = 3000;
+    const res_3 = PopCount(num_3);
+
+    const num_4: u8 = 0b10101010;
+    const res_4 = PopCount(num_4);
+    const num_5: u8 = 0b11111110;
+    const res_5 = PopCount(num_5);
+
+    try std.testing.expectEqual(1, res_1);
+    try std.testing.expectEqual(3, res_2);
+    try std.testing.expectEqual(7, res_3);
+    try std.testing.expectEqual(4, res_4);
+    try std.testing.expectEqual(7, res_5);
+}
