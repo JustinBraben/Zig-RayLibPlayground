@@ -2,16 +2,47 @@ const std = @import("std");
 const ray = @import("raylib.zig");
 const ecs = @import("ecs/ecs.zig");
 const Game = @import("game/game.zig").Game;
+const Utility = @import("ecs/core/utility.zig");
+const Entity = @import("ecs/entity/entity.zig");
+
+pub const Suite = enum {
+    Spades,
+    Hearts,
+    Diamonds,
+    Clubs,
+};
+
+pub const Person = struct {
+    age: u8,
+    canJump: bool,
+};
 
 pub fn main() !void {
     // try ray_main();
 
-    var gpa_impl = std.heap.GeneralPurposeAllocator(.{ .stack_trace_frames = 8 }){};
-    const gpa = gpa_impl.allocator();
-    var game: Game = undefined;
-    game = Game.init(gpa, 850, 450);
-    defer game.deinit();
-    try hints();
+    // var gpa_impl = std.heap.GeneralPurposeAllocator(.{ .stack_trace_frames = 8 }){};
+    // const gpa = gpa_impl.allocator();
+    // var game: Game = undefined;
+    // game = Game.init(gpa, 850, 450);
+    // defer game.deinit();
+
+    const card_1: Suite = .Spades;
+    Utility.debugPrintType(card_1);
+
+    const person_1 = Person{ .age = 30, .canJump = true };
+    Utility.debugPrintType(person_1);
+
+    // const m = Entity.EntityTraitsType(.medium).init();
+    // std.debug.print("traits value_type is {}\n", .{@TypeOf(m.value_type)});
+    const u_num1: u16 = 10;
+    const u_num2: u32 = 12;
+    const u_num3: u64 = 14;
+    Utility.PrintValidEntityTraitsType(u_num1);
+    Utility.PrintValidEntityTraitsType(u_num2);
+    Utility.PrintValidEntityTraitsType(u_num3);
+
+
+    // try hints();
 }
 
 pub fn ray_main() !void {
