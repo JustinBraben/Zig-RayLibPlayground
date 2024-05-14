@@ -32,6 +32,7 @@ pub fn EntityTraits(comptime EntityType: type) type {
     assert((version_mask & (version_mask + 1)) == 0);
 
     return struct {
+        entity_type: type = EntityType,
         entity_mask: EntityType = entity_mask,
         version_mask: EntityType = version_mask,
         length: EntityType = Utility.PopCount(entity_mask),
@@ -46,6 +47,7 @@ pub fn EntityTraits(comptime EntityType: type) type {
 
         pub fn init() Self {
             return Self{
+                .entity_type = EntityType,
                 .entity_mask = entity_mask,
                 .version_mask = version_mask,
                 .length = Utility.PopCount(entity_mask),
