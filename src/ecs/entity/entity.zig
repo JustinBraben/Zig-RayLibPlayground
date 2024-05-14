@@ -2,6 +2,9 @@ const std = @import("std");
 const assert = std.debug.assert;
 const Utility = @import("../core/utility.zig");
 
+/// Default entity traits for the entity and version types.
+pub const DefaultEntityTraits = EntityTraits(u32);
+
 /// EntityTraits provides a set of functions to work with entity identifiers.
 /// It is a type that is used to define the entity and version types.
 pub fn EntityTraits(comptime EntityType: type) type {
