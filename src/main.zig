@@ -34,13 +34,15 @@ pub fn main() !void {
 
     // const m = Entity.EntityTraitsType(.medium).init();
     // std.debug.print("traits value_type is {}\n", .{@TypeOf(m.value_type)});
-    const u_num1: u16 = 10;
     const u_num2: u32 = 12;
     const u_num3: u64 = 14;
-    Utility.PrintValidEntityTraitsType(u_num1);
     Utility.PrintValidEntityTraitsType(u_num2);
     Utility.PrintValidEntityTraitsType(u_num3);
 
+    const e_t = Entity.EntityTraits(u32).init();
+    std.debug.print("e_t is {}\n", .{e_t});
+    const e_tt = Entity.EntityTraits(u64).init();
+    std.debug.print("e_tt is {}\n", .{e_tt});
 
     // try hints();
 }

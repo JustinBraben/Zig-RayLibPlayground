@@ -14,7 +14,7 @@ pub fn GetValidEntityTraitsType(UIntData: anytype) type {
 
 pub fn PrintValidEntityTraitsType(UIntData: anytype) void {
     switch (@TypeOf(UIntData)) {
-        u16, u32, u64 => |DataType| std.debug.print("{s} is allowed\n", .{@typeName(DataType)}),
+        u32, u64 => |DataType| std.debug.print("{s} is allowed\n", .{@typeName(DataType)}),
         else => |DataType| @compileError("Unsupported Type " ++ @typeName(DataType) ++ " for EntityTraitsType"),
     }
 }
@@ -78,15 +78,11 @@ test "DeepChild" {
 
 /// PopCount returns the number of bits set to 1 in the given value.
 pub fn PopCount(value: anytype) @TypeOf(value) {
-    const UIntType = switch (@TypeOf(value)) {
-        u8, u16, u32, u64 => |T| T,
-        else => |DataType| @compileError("Invalid UIntDataType" ++ DataType ++ " for PopperCount"),
-    };
+    if (@typeInfo(@TypeOf(value)) != .Int) {
+        @compileError("Unsupported Type " ++ @typeName(@TypeOf(value)) ++ " for PopCount");
+    }
 
-    const valAnd1 = value & 1;
-    const valShifted = value >> 1;
-
-    return if (value != 0) @as(UIntType, valAnd1) + PopCount(valShifted) else 0;
+    return if (value != 0) (@as(@TypeOf(value), value & 1) + PopCount(value >> 1)) else 0;
 }
 
 test "PopCount" {

@@ -5,14 +5,14 @@ const Iterator = @import("../core/iterator.zig");
 const Utility = @import("../core/utility.zig");
 const Entity = @import("entity.zig");
 
-const DefaultEnTTTraits = Entity.DefaultEntityTraits;
-
 pub const Registry = struct {
     allocator: Allocator,
+    entt_traits: Entity.EntityTraits(u32),
 
     pub fn init(allocator: Allocator) Registry {
         return .{
             .allocator = allocator,
+            .entt_traits = Entity.EntityTraits(u32).init(),
         };
     }
 
