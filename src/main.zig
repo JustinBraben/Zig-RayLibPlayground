@@ -18,33 +18,44 @@ pub const Person = struct {
 };
 
 pub fn main() !void {
-    // try ray_main();
+    try ray_ball();
+    try hints();
+}
+
+pub fn ray_ball() !void {
+    const width = 800;
+    const height = 450;
+
+    ray.SetConfigFlags(ray.FLAG_MSAA_4X_HINT | ray.FLAG_VSYNC_HINT);
+    ray.InitWindow(width, height, "zig raylib example");
+    defer ray.CloseWindow();
 
     // var gpa_impl = std.heap.GeneralPurposeAllocator(.{ .stack_trace_frames = 8 }){};
     // const gpa = gpa_impl.allocator();
-    // var game: Game = undefined;
-    // game = Game.init(gpa, 850, 450);
-    // defer game.deinit();
 
-    const card_1: Suite = .Spades;
-    Utility.debugPrintType(card_1);
+    const clear_color = ray.BLACK;
+    // const colors = [_]ray.Color{ ray.GRAY, ray.RED, ray.GOLD, ray.LIME, ray.BLUE, ray.VIOLET, ray.BROWN };
+    // const colors_len: i32 = @intCast(colors.len);
+    // var current_color: i32 = 2;
 
-    const person_1 = Person{ .age = 30, .canJump = true };
-    Utility.debugPrintType(person_1);
+    while (!ray.WindowShouldClose()) {
+        // input
+        if (ray.IsMouseButtonPressed(ray.MOUSE_LEFT_BUTTON)) {
+            std.debug.print("LMB Pressed\n", .{});
+        }
 
-    // const m = Entity.EntityTraitsType(.medium).init();
-    // std.debug.print("traits value_type is {}\n", .{@TypeOf(m.value_type)});
-    const u_num2: u32 = 12;
-    const u_num3: u64 = 14;
-    Utility.PrintValidEntityTraitsType(u_num2);
-    Utility.PrintValidEntityTraitsType(u_num3);
+        // draw
+        {
+            ray.BeginDrawing();
+            defer ray.EndDrawing();
 
-    const e_t = Entity.EntityTraits(u32).init();
-    std.debug.print("e_t is {}\n", .{e_t});
-    const e_tt = Entity.EntityTraits(u64).init();
-    std.debug.print("e_tt is {}\n", .{e_tt});
+            ray.ClearBackground(clear_color);
 
-    // try hints();
+            ray.DrawCircle(0, 0, 10, ray.BLUE);
+
+            ray.DrawFPS(width - 100, 10);
+        }
+    }
 }
 
 pub fn ray_main() !void {
