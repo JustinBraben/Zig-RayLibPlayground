@@ -5,16 +5,11 @@ const Game = @import("game/game.zig").Game;
 const Utility = @import("ecs/core/utility.zig");
 const Entity = @import("ecs/entity/entity.zig");
 
-pub const Suite = enum {
-    Spades,
-    Hearts,
-    Diamonds,
-    Clubs,
-};
-
-pub const Person = struct {
-    age: u8,
-    canJump: bool,
+const Ball = struct {
+    position: ray.Vector2,
+    velocity: ray.Vector2,
+    radius: f32,
+    color: ray.Color,
 };
 
 pub fn main() !void {
@@ -30,13 +25,33 @@ pub fn ray_ball() !void {
     ray.InitWindow(width, height, "zig raylib example");
     defer ray.CloseWindow();
 
-    // var gpa_impl = std.heap.GeneralPurposeAllocator(.{ .stack_trace_frames = 8 }){};
-    // const gpa = gpa_impl.allocator();
+    var gpa_impl = std.heap.GeneralPurposeAllocator(.{ .stack_trace_frames = 8 }){};
+    const gpa = gpa_impl.allocator();
 
     const clear_color = ray.BLACK;
     // const colors = [_]ray.Color{ ray.GRAY, ray.RED, ray.GOLD, ray.LIME, ray.BLUE, ray.VIOLET, ray.BROWN };
     // const colors_len: i32 = @intCast(colors.len);
     // var current_color: i32 = 2;
+
+    var ball_list: std.MultiArrayList(Ball) = .{};
+    defer ball_list.deinit(gpa);
+
+    var count: usize = 0;
+    while(count < 5) : (count += 1) {
+        const position = ray.Vector2{ .x = (@as(f32, @floatFromInt(ray.GetRandomValue(0, width)))), .y = (@as(f32, @floatFromInt(ray.GetRandomValue(0, height)))) };
+        var velocity = ray.Vector2{ .x = @as(f32, @floatFromInt(ray.GetRandomValue(-1, 1))), .y = @as(f32, @floatFromInt(ray.GetRandomValue(-1, 1))) };
+        velocity.x = velocity.x / 2.0;
+        velocity.y = velocity.y / 2.0;
+        const ball = Ball{
+            .position = position,
+            .velocity = velocity,
+            .radius = @as(f32, @floatFromInt(ray.GetRandomValue(10, 40))),
+            .color = ray.BLUE,
+        };
+        try ball_list.append(gpa, ball);
+    }
+
+    std.debug.print("{}\n", .{ball_list.slice().get(0)});
 
     while (!ray.WindowShouldClose()) {
         // input
@@ -51,7 +66,27 @@ pub fn ray_ball() !void {
 
             ray.ClearBackground(clear_color);
 
-            ray.DrawCircle(0, 0, 10, ray.BLUE);
+            // for (ball_list.items(.position)) |position| {
+            //     ray.DrawCircleV(position, 10, ray.BLUE);
+            // }
+
+            const size = ball_list.len;
+            var index: usize = 0;
+            while (index < size) : (index += 1) {
+                var ball = ball_list.get(index);
+                const vel = ball.velocity;
+                var position = ball.position;
+                position.x += vel.x;
+                position.y += vel.y;
+                ball_list.set(index, .{
+                    .position = position,
+                    .velocity = vel,
+                    .radius = ball.radius,
+                    .color = ball.color,
+                });
+                ball = ball_list.get(index);
+                ray.DrawCircleV(ball.position, ball.radius, ball.color);
+            }
 
             ray.DrawFPS(width - 100, 10);
         }
