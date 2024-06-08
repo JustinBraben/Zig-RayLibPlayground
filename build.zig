@@ -50,7 +50,7 @@ pub fn build(b: *std.Build) void {
     });
     exe.root_module.strip = strip;
 
-    // expose firefly library as a module
+    // expose ecs library as a module
     const firefly_module = b.addModule("ecs", .{
         .root_source_file = .{ .path = "src/ecs/ecs.zig" },
     });
@@ -95,19 +95,19 @@ pub fn build(b: *std.Build) void {
     });
     const run_unit_tests = b.addRunArtifact(unit_tests);
 
-    // internal tests
-    const internal_test = b.addTest(.{
+    // ecs tests
+    const ecs_test = b.addTest(.{
         .root_source_file = .{.path = "src/ecs/tests.zig"},
         .optimize = optimize,
         .target = target,
-        .name = "internal_tests",
+        .name = "ecs_tests",
     });
-    const run_internal_tests = b.addRunArtifact(internal_test);
+    const run_ecs_tests = b.addRunArtifact(ecs_test);
 
     // Similar to creating the run step earlier, this exposes a `test` step to
     // the `zig build --help` menu, providing a way for the user to request
     // running the unit tests.
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_unit_tests.step);
-    test_step.dependOn(&run_internal_tests.step);
+    test_step.dependOn(&run_ecs_tests.step);
 }
