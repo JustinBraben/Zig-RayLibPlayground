@@ -1,9 +1,6 @@
 const std = @import("std");
 const ray = @import("raylib.zig");
-const ecs = @import("ecs/ecs.zig");
 const Game = @import("game/game.zig").Game;
-const Utility = @import("ecs/core/utility.zig");
-const Entity = @import("ecs/entity/entity.zig");
 
 const Ball = struct {
     position: ray.Vector2,
