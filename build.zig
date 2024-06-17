@@ -36,7 +36,7 @@ pub fn build(b: *std.Build) void {
     // create ecs library
     const ecs = b.addStaticLibrary(.{
         .name = "ecs",
-        .root_source_file = .{ .path = "src/ecs/ecs.zig" },
+        .root_source_file = b.path("src/ecs/ecs.zig"),
         .target = target,
         .optimize = optimize,
     });
@@ -44,17 +44,17 @@ pub fn build(b: *std.Build) void {
 
     const exe = b.addExecutable(.{
         .name = "Zig-RayLibPlayground",
-        .root_source_file = .{ .path = "src/main.zig" },
+        .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
     exe.root_module.strip = strip;
 
     // expose ecs library as a module
-    const firefly_module = b.addModule("ecs", .{
-        .root_source_file = .{ .path = "src/ecs/ecs.zig" },
+    const ecs_module = b.addModule("ecs", .{
+        .root_source_file = b.path("src/ecs/ecs.zig"),
     });
-    firefly_module.addIncludePath(raylib_dep.path("src/"));
+    ecs_module.addIncludePath(raylib_dep.path("src/"));
 
     exe.linkLibrary(raylib_dep.artifact("raylib"));
 
@@ -89,7 +89,7 @@ pub fn build(b: *std.Build) void {
     // Creates a step for unit testing. This only builds the test executable
     // but does not run it.
     const unit_tests = b.addTest(.{
-        .root_source_file = .{ .path = "src/main.zig" },
+        .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
@@ -97,7 +97,7 @@ pub fn build(b: *std.Build) void {
 
     // ecs tests
     const ecs_test = b.addTest(.{
-        .root_source_file = .{.path = "src/ecs/tests.zig"},
+        .root_source_file = b.path("src/ecs/tests.zig"),
         .optimize = optimize,
         .target = target,
         .name = "ecs_tests",
