@@ -42,7 +42,6 @@ pub const Registry = struct {
         // Use that pointer
         const type_id = comptime utils.typeId(T);
         if (self.components.getEntry(type_id)) |kv| {
-            std.debug.print("Found : {} type in components, we have already initialized a pointer for it\n", .{kv});
             return @as(*Storage(T), @ptrFromInt(kv.value_ptr.*));
         }
 
@@ -62,16 +61,12 @@ pub const Registry = struct {
         return new_entity_id;
     }
 
+    /// Associate given `entity_id` with `datatype_args`
     pub fn emplace(self: *Self, entity_id: u32, datatype_args: anytype) void {
-        std.debug.print("Attempting to add to entity {}\n", .{entity_id});
-        std.debug.print("There are this many available entities {}\n", .{self.available_entities.items.len});
-        std.debug.print("Attempting to use datatype_args {}\n", .{datatype_args});
-
         const datatype_args_str = @typeName(@TypeOf(datatype_args));
 
+        // Store the type in the type_set if not found
         if (self.type_set.get(datatype_args_str) == null) {
-            std.debug.print("{s} not found in type_store, adding...\n", .{datatype_args_str});
-
             self.type_set.put(datatype_args_str, {}) catch unreachable;
         }
 
