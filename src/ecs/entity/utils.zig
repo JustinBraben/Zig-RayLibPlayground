@@ -1,6 +1,7 @@
 const std = @import("std");
 const testing = std.testing;
-const Fnv1a_32 = std.hash.Fnv1a_32; 
+const builtin = std.builtin;
+const Fnv1a_32 = std.hash.Fnv1a_32;
 
 /// comptime string hashing for the type names
 pub fn typeId(comptime T: type) u32 {
@@ -19,6 +20,33 @@ pub fn isComptimeIntOrFloat(comptime T: type) bool {
         .ComptimeInt, .ComptimeFloat => true,
         else => false,
     };
+}
+
+pub fn isU32orU64(comptime T: type) bool {
+    if (T == u32) {
+        return true;
+    }
+    if (T == u64) {
+        return true;
+    }
+
+    return false;
+}
+
+pub fn popCount(value: anytype) @TypeOf(value) {
+    const ReturnType = @TypeOf(value);
+    return if (value > 0) @as(ReturnType, (@as(ReturnType, (value & 1)) + popCount(@as(ReturnType, value >> 1)))) else @as(ReturnType, 0);
+}
+
+test "popCount" {
+    const num1: u32 = 1000;
+    const num2: u16 = 0b1001011;
+
+    const num1_pop = popCount(num1);
+    const num2_pop = popCount(num2);
+
+    try testing.expectEqual(6, num1_pop);
+    try testing.expectEqual(4, num2_pop);
 }
 
 test "Fnv1a_32" {
